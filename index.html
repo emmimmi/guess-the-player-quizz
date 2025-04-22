@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guess the Player Quiz</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .question-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+    .option {
+      background: #e0e0e0;
+      padding: 0.8rem;
+      border-radius: 5px;
+      margin: 0.5rem 0;
+      cursor: pointer;
+    }
+    .option:hover {
+      background: #ccc;
+    }
+    .hidden {
+      display: none;
+    }
+    .selected {
+      background: #4caf50;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>Guess the Player Quiz</h1>
+  <div class="question-card" id="questionContainer">
+    <h2 id="question">Loading question...</h2>
+    <div id="options"></div>
+    <button id="revealBtn" class="hidden">Reveal Key Player Answer</button>
+    <div id="result" class="hidden"></div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "What’s the best snack during a movie?",
+        options: ["Popcorn", "Nachos", "Chocolate", "Ice Cream"]
+      },
+      {
+        question: "Which superpower would you choose?",
+        options: ["Flying", "Invisibility", "Time travel", "Super strength"]
+      },
+      {
+        question: "What's your ideal vacation?",
+        options: ["Beach", "Mountains", "City", "Countryside"]
+      }
+    ];
+
+    let currentQuestion = 0;
+    let keyPlayerChoice = null;
+    let playerGuesses = [];
+
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const revealBtn = document.getElementById('revealBtn');
+    const resultEl = document.getElementById('result');
+
+    function loadQuestion() {
+      keyPlayerChoice = null;
+      playerGuesses = [];
+      resultEl.classList.add('hidden');
+      optionsEl.innerHTML = '';
+
+      const q = questions[currentQuestion];
+      questionEl.textContent = q.question;
+
+      q.options.forEach((opt, index) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.onclick = () => selectOption(index);
+        optionsEl.appendChild(div);
+      });
+
+      revealBtn.classList.add('hidden');
+    }
+
+    function selectOption(index) {
+      const allOptions = document.querySelectorAll('.option');
+
+      if (!keyPlayerChoice) {
+        keyPlayerChoice = index;
+        alert('You are the Key Player. Choice locked. Others can now guess.');
+        allOptions.forEach(opt => opt.classList.add('hidden'));
+        loadPlayerGuessView();
+      }
+    }
+
+    function loadPlayerGuessView() {
+      optionsEl.innerHTML = '';
+      const q = questions[currentQuestion];
+      q.options.forEach((opt, index) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.onclick = () => {
+          playerGuesses.push(index);
+          div.classList.add('selected');
+          revealBtn.classList.remove('hidden');
+        };
+        optionsEl.appendChild(div);
+      });
+    }
+
+    revealBtn.onclick = () => {
+      const q = questions[currentQuestion];
+      const correctAnswer = q.options[keyPlayerChoice];
+      const matches = playerGuesses.filter(guess => guess === keyPlayerChoice).length;
+
+      resultEl.innerHTML = `
+        <p><strong>Key Player's Answer:</strong> ${correctAnswer}</p>
+        <p><strong>Matched by:</strong> ${matches} player(s)</p>
+      `;
+      resultEl.classList.remove('hidden');
+      revealBtn.textContent = 'Next Question';
+      revealBtn.onclick = nextQuestion;
+    };
+
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion >= questions.length) {
+        questionEl.textContent = "Quiz complete! Refresh to play again.";
+        optionsEl.innerHTML = '';
+        revealBtn.classList.add('hidden');
+        resultEl.classList.add('hidden');
+      } else {
+        revealBtn.textContent = 'Reveal Key Player Answer';
+        loadQuestion();
+      }
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
